@@ -231,6 +231,17 @@ const OldOrganizationSettingsForm = React.createClass({
               )}
 
               <BooleanField
+                key="require2FA"
+                name="require2FA"
+                label={t('Require Two Factor Auth')}
+                value={formData.required2FA}
+                help={t('Require Two Factor Authentication for all members.')}
+                required={false}
+                error={errors.required2FA}
+                onChange={this.onFieldChange.bind(this, 'required2FA')}
+              />
+
+              <BooleanField
                 key="allowSharedIssues"
                 name="allowSharedIssues"
                 label={t('Allow Shared Issues')}
