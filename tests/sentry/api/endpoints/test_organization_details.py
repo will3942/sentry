@@ -394,13 +394,10 @@ class OrganizationSettings2FATest(APITestCase):
         TotpInterface().enroll(user)
         assert Authenticator.objects.user_has_2fa(user)
 
-    def assert_can_enable_org_2fa(self, organization, user, status_code=200):
-        self.__helper_enable_organization_2fa(organization, user, status_code)
+    def assert_can_enable_2FA(self, organization, user, status_code=200):
+        self.assert_cannot_enable_2FA(organization, user, status_code)
 
-    def assert_cannot_enable_org_2fa(self, organization, user, status_code):
-        self.__helper_enable_organization_2fa(organization, user, status_code)
-
-    def __helper_enable_organization_2fa(self, organization, user, status_code):
+    def assert_cannot_enable_2FA(self, organization, user, status_code):
         def enable_org_2fa():
             self.login_as(user)
             url = reverse(
@@ -426,34 +423,52 @@ class OrganizationSettings2FATest(APITestCase):
         else:
             assert not organization.flags.require_2fa
 
-    def test_cannot_enforce_2fa_without_2fa_enabled(self):
-        owner = self.create_user()
+    def test_cannot_set_enforce_2fa_without_2fa(self):
+        owner = self.user
         organization = self.create_organization(owner=owner)
-
         assert not Authenticator.objects.user_has_2fa(owner)
-        self.assert_cannot_enable_org_2fa(organization, owner, 400)
+
+        self.enable_user_2fa(owner)
+        self.assert_can_enable_2FA(organization, owner)
 
     def test_owner_can_set_2fa(self):
-        owner = self.create_user()
+        owner = self.user
         organization = self.create_organization(owner=owner)
 
         self.enable_user_2fa(owner)
-        self.assert_can_enable_org_2fa(organization, owner)
+        self.assert_can_enable_2FA(organization, owner)
 
     def test_manager_can_set_2fa(self):
         manager = self.create_user()
         organization = self.create_organization(owner=self.create_user())
         self.create_member(organization=organization, user=manager, role="manager")
 
-        self.assert_cannot_enable_org_2fa(organization, manager, 400)
+        self.assert_cannot_enable_2FA(organization, manager, 400)
         self.enable_user_2fa(manager)
-        self.assert_can_enable_org_2fa(organization, manager)
+        self.assert_can_enable_2FA(organization, manager)
 
     def test_members_cannot_set_2fa(self):
         member = self.create_user()
         organization = self.create_organization(owner=self.create_user())
         self.create_member(organization=organization, user=member, role="member")
 
-        self.assert_cannot_enable_org_2fa(organization, member, 403)
+        self.assert_cannot_enable_2FA(organization, member, 403)
         self.enable_user_2fa(member)
-        self.assert_cannot_enable_org_2fa(organization, member, 403)
+        self.assert_cannot_enable_2FA(organization, member, 403)
+
+    def test_new_member_must_enable_2FA(self):
+        # prior to joing!
+        pass
+
+    def test_non_compliant_members_notified(self):
+        # recieve an email that 2FA must be enabled
+        pass
+
+    def test_new_sentry_user_join_must_enable_2FA(self):
+        pass
+
+    def test_non_complaint_members_are_blocked(self):
+        pass
+
+    def test_member_disable_all_2FA_blocked(self):
+        pass
