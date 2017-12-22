@@ -3,7 +3,6 @@ from __future__ import absolute_import
 from sentry.testutils import AcceptanceTestCase
 from django.core.urlresolvers import reverse
 from sentry.models import TotpInterface
-import six
 
 
 class OrganizationIndexTest(AcceptanceTestCase):
@@ -20,8 +19,7 @@ class OrganizationIndexTest(AcceptanceTestCase):
             teams=[self.team],
         )
         TotpInterface().enroll(self.org_owner)
-        self.org.flags.require_2fa = True
-        self.org.save()
+        self.enable_organization_2fa(self.org)
 
         self.org_member = self.create_member(user=self.org_user, organization=self.org)
         self.org_index_path = reverse(
@@ -34,8 +32,13 @@ class OrganizationIndexTest(AcceptanceTestCase):
         self.sentry_index_path = reverse('sentry')
         self.login_as(self.org_user)
 
+    def enable_organization_2fa(self, organization):
+        organization.flags.require_2fa = True
+        organization.save()
+
     def assert_showing_2fa_page(self):
-        assert self.browser.element_exists('.circle-indicator')
+        assert self.browser.element_exists('.twofactor-settings')
+        assert reverse('sentry-account-settings-2fa') in self.browser.current_url
         assert not self.browser.element_exists('.organization-home')
 
     def assert_showing_org_page(self):
@@ -63,32 +66,28 @@ class OrganizationIndexTest(AcceptanceTestCase):
         self.assert_showing_org_page()
 
     def test_non_2fa_member_multi_org(self):
-        def test_orgs(path, num):
+        def test_orgs(path, label):
             self.browser.get(path)
             self.browser.wait_until_not('.loading-indicator')
             self.browser.snapshot(
-                'organization index  -- 2FA NonCompliant Member Multi%s' %
-                six.text_type(num))
+                'organization index  -- 2FA NonCompliant Member Multi%s' % label)
 
-        org1 = self.create_organization(owner=self.org_user)
-        org2 = self.create_organization(owner=self.create_user())
-        org3 = self.create_organization(owner=self.create_user())
-        org4 = self.create_organization(owner=self.create_user())
-
-        self.create_member(user=self.org_user, organization=org2, role="member")
-        self.create_member(user=self.org_user, organization=org3, role="admin")
-        self.create_member(user=self.org_user, organization=org4, role="manager")
-
-        org_paths = {
-            1: reverse('sentry-organization-home', args=[org1.slug]),
-            2: reverse('sentry-organization-home', args=[org2.slug]),
-            3: reverse('sentry-organization-home', args=[org3.slug]),
-            4: reverse('sentry-organization-home', args=[org4.slug]),
+        orgs = {
+            "Org_Owner": self.create_organization(owner=self.org_user),
+            "Org_Member": self.create_organization(owner=self.create_user()),
+            "Org_Admin": self.create_organization(owner=self.create_user()),
+            "Org_Manager": self.create_organization(owner=self.create_user()),
         }
 
-        for num, path in org_paths.items():
-            test_orgs(path, num)
+        self.create_member(user=self.org_user, organization=orgs["Org_Member"], role="member")
+        self.create_member(user=self.org_user, organization=orgs["Org_Admin"], role="admin")
+        self.create_member(user=self.org_user, organization=orgs["Org_Manager"], role="manager")
+
+        for label, org in orgs.items():
+            path = reverse('sentry-organization-home', args=[org.slug])
+            test_orgs(path, label)
             self.assert_showing_org_page()
 
-        test_orgs(self.org_index_path, 0)
-        self.assert_showing_2fa_page()
+            self.enable_organization_2fa(org)
+            test_orgs(path, "Org2FA Enabled " + label)
+            self.assert_showing_2fa_page()
