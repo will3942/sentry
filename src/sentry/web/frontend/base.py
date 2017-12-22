@@ -215,10 +215,7 @@ class BaseView(View, OrganizationMixin):
         if not self.has_permission(request, *args, **kwargs):
             return self.handle_permission_required(request, *args, **kwargs)
 
-        import pdb
-        pdb.set_trace()
-        organization = self.get_active_organization(request)
-        if self._is_not_2fa_compliant(request, organization):
+        if 'organization' in kwargs and self._is_not_2fa_compliant(request, kwargs['organization']):
             return self.handle_not_2fa_compliant(request, *args, **kwargs)
 
         self.request = request
