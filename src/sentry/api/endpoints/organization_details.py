@@ -181,6 +181,12 @@ class OrganizationDetailsEndpoint(OrganizationEndpoint):
                                           team should be created for.
         :auth: required
         """
+        if self.is_not_2fa_complaint(request.user, organization):
+            return Response(
+                {'detail': 'This organization requires Two-factor authentication to be enabled.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         context = serialize(
             organization,
             request.user,

@@ -9,7 +9,7 @@ from sentry.app import raven
 from sentry.auth import access
 from sentry.auth.superuser import is_active_superuser
 from sentry.models import (
-    ApiKey, Organization, OrganizationMemberTeam, OrganizationStatus, Project, ReleaseProject, Team
+    ApiKey, Organization, OrganizationMemberTeam, OrganizationStatus, Project, ReleaseProject, Team, Authenticator
 )
 from sentry.utils import auth
 
@@ -133,6 +133,9 @@ class OrganizationEndpoint(Endpoint):
 
         kwargs['organization'] = organization
         return (args, kwargs)
+
+    def is_not_2fa_complaint(self, user, organization):
+        return organization.flags.require_2fa and not Authenticator.objects.user_has_2fa(user)
 
 
 class OrganizationReleasesBaseEndpoint(OrganizationEndpoint):

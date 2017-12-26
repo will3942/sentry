@@ -106,12 +106,8 @@ class OrganizationMixin(object):
             organization=organization,
         ).exists()
 
-    def _is_not_2fa_compliant(self, request, organization):
-        if organization and (request.path == reverse(
-                'sentry-organization-home', args=[organization.slug])):
-            return organization.flags.require_2fa and not Authenticator.objects.user_has_2fa(
-                request.user)
-        return False
+    def is_not_2fa_compliant(self, user, organization):
+        return organization.flags.require_2fa and not Authenticator.objects.user_has_2fa(user)
 
     def get_active_team(self, request, organization, team_slug):
         """
@@ -195,6 +191,8 @@ class BaseView(View, OrganizationMixin):
            check unconditionally again.
 
         """
+        import pdb
+        pdb.set_trace()
         if self.csrf_protect:
             if hasattr(self.dispatch.__func__, 'csrf_exempt'):
                 delattr(self.dispatch.__func__, 'csrf_exempt')
@@ -215,7 +213,8 @@ class BaseView(View, OrganizationMixin):
         if not self.has_permission(request, *args, **kwargs):
             return self.handle_permission_required(request, *args, **kwargs)
 
-        if 'organization' in kwargs and self._is_not_2fa_compliant(request, kwargs['organization']):
+        if 'organization' in kwargs and self.is_not_2fa_compliant(
+                request.user, kwargs['organization']):
             return self.handle_not_2fa_compliant(request, *args, **kwargs)
 
         self.request = request

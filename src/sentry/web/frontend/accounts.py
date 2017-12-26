@@ -40,6 +40,7 @@ from sentry.web.forms.accounts import (
 )
 from sentry.web.helpers import render_to_response
 from sentry.utils import auth
+from sentry.web.frontend.base import OrganizationMixin
 
 logger = logging.getLogger('sentry.accounts')
 
@@ -325,6 +326,11 @@ def twofactor_settings(request):
         return HttpResponseRedirect(reverse('sentry-account-settings'))
 
     context = csrf(request)
+
+    orgmixin = OrganizationMixin()
+    organization = orgmixin.get_active_organization(request)
+    is_not_2fa_compliant = orgmixin.is_not_2fa_compliant(request.user, organization)
+
     context.update(
         {
             'page': 'security',
@@ -333,6 +339,13 @@ def twofactor_settings(request):
             'has_newsletters': newsletter.is_enabled,
         }
     )
+    if is_not_2fa_compliant:
+        context.update(
+            {
+                'organization': organization,
+                'is_not_2fa_compliant': is_not_2fa_compliant,
+            }
+        )
     return render_to_response('sentry/account/twofactor.html', context, request)
 
 

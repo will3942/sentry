@@ -19,6 +19,7 @@ import {t} from '../locale';
 
 let ERROR_TYPES = {
   ORG_NOT_FOUND: 'ORG_NOT_FOUND',
+  ORG_REQUIRES_2FA: 'ORG_REQUIRES_2FA',
 };
 
 function getRequiredAdminActions(org) {
@@ -111,6 +112,9 @@ const OrganizationContext = React.createClass({
           case 'NOT FOUND':
             errorType = ERROR_TYPES.ORG_NOT_FOUND;
             break;
+          case 'FORBIDDEN':
+            errorType = ERROR_TYPES.ORG_REQUIRES_2FA;
+            break;
           default:
         }
         this.setState({
@@ -172,6 +176,17 @@ const OrganizationContext = React.createClass({
             <div className="container">
               <div className="alert alert-block">
                 {t('The organization you were looking for was not found.')}
+              </div>
+            </div>
+          );
+        case ERROR_TYPES.ORG_REQUIRES_2FA:
+          return (
+            <div className="container">
+              <div className="alert alert-block">
+                {t(
+                  'The organization you are trying to access requires Two-factor authentication.'
+                )}
+                <a href="/account/settings/2fa/">{t('Click here to enable it.')}</a>
               </div>
             </div>
           );

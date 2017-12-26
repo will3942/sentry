@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from sentry.testutils import AcceptanceTestCase
 from django.core.urlresolvers import reverse
-from sentry.models import TotpInterface
+from sentry.models import TotpInterface, Authenticator
 
 
 class OrganizationIndexTest(AcceptanceTestCase):
@@ -91,3 +91,17 @@ class OrganizationIndexTest(AcceptanceTestCase):
             self.enable_organization_2fa(org)
             test_orgs(path, "Org2FA Enabled " + label)
             self.assert_showing_2fa_page()
+
+    def test_blocked_if_2fa_later_disabled(self):
+        TotpInterface().enroll(self.org_user)
+        self.browser.get(self.org_index_path)
+        self.browser.wait_until_not('.loading-indicator')
+        self.assert_showing_org_page()
+
+        # ToDO: Click trashcan and remove authentication
+        assert Authenticator.objects.user_has_2fa(self.org_user)
+        url = reverse('sentry-account-settings-2fa-totp')
+        import pdb
+        pdb.set_trace()
+        self.browser.post(url)
+        assert not Authenticator.objects.user_has_2fa(self.org_user)
