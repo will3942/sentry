@@ -191,8 +191,6 @@ class BaseView(View, OrganizationMixin):
            check unconditionally again.
 
         """
-        import pdb
-        pdb.set_trace()
         if self.csrf_protect:
             if hasattr(self.dispatch.__func__, 'csrf_exempt'):
                 delattr(self.dispatch.__func__, 'csrf_exempt')

@@ -11,7 +11,7 @@
 {% if is_not_2fa_compliant %}
   <p class="well">
     <span class="icon-exclamation circle-indicator disabled"></span>
-    {{ organization.name }} {% blocktrans  %}is your active organization and requires Two-factor authentication. Please enable Two-factor authentication to view the organization.{% endblocktrans  %}
+    {% blocktrans  %} The organization you are trying to view requires two-factor authentication. Please enable two-factor authentication to view the organization.{% endblocktrans  %}
     <a href="/organizations/new/">If you want to create a new organization click here.</a>
   </p>
 {% endif %}

@@ -180,7 +180,7 @@ const OrganizationContext = React.createClass({
             </div>
           );
         case ERROR_TYPES.ORG_REQUIRES_2FA:
-          return (
+          /*return (
             <div className="container">
               <div className="alert alert-block">
                 {t(
@@ -189,7 +189,9 @@ const OrganizationContext = React.createClass({
                 <a href="/account/settings/2fa/">{t('Click here to enable it.')}</a>
               </div>
             </div>
-          );
+          );*/
+          window.location.href = '/account/settings/2fa/';
+          break;
         default:
           return <LoadingError onRetry={this.remountComponent} />;
       }
