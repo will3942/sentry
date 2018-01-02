@@ -106,17 +106,11 @@ const OrganizationContext = React.createClass({
         );
       },
 
-      error: (_, textStatus, errorThrown) => {
+      error: (error, textStatus, errorThrown) => {
         let errorType = null;
-        switch (errorThrown) {
-          case 'NOT FOUND':
-            errorType = ERROR_TYPES.ORG_NOT_FOUND;
-            break;
-          case 'FORBIDDEN':
-            errorType = ERROR_TYPES.ORG_REQUIRES_2FA;
-            break;
-          default:
-        }
+        if (errorThrown == 'NOT FOUND') errorType = ERROR_TYPES.ORG_NOT_FOUND;
+        else if (error.responseJSON.detail == 'Organization requires 2FA to be enabled')
+          errorType = ERROR_TYPES.ORG_REQUIRES_2FA;
         this.setState({
           loading: false,
           error: true,
@@ -180,18 +174,16 @@ const OrganizationContext = React.createClass({
             </div>
           );
         case ERROR_TYPES.ORG_REQUIRES_2FA:
-          /*return (
+          window.location.href = '/account/settings/2fa/' + '?is_not_2fa_compliant=True';
+          return (
             <div className="container">
               <div className="alert alert-block">
                 {t(
                   'The organization you are trying to access requires Two-factor authentication.'
                 )}
-                <a href="/account/settings/2fa/">{t('Click here to enable it.')}</a>
               </div>
             </div>
-          );*/
-          window.location.href = '/account/settings/2fa/';
-          break;
+          );
         default:
           return <LoadingError onRetry={this.remountComponent} />;
       }
