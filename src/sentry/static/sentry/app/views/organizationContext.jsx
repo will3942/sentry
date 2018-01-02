@@ -109,7 +109,10 @@ const OrganizationContext = React.createClass({
       error: (error, textStatus, errorThrown) => {
         let errorType = null;
         if (errorThrown == 'NOT FOUND') errorType = ERROR_TYPES.ORG_NOT_FOUND;
-        else if (error.responseJSON.detail == 'Organization requires 2FA to be enabled')
+        else if (
+          error.responseJSON &&
+          error.responseJSON.detail === 'Organization requires 2FA to be enabled'
+        )
           errorType = ERROR_TYPES.ORG_REQUIRES_2FA;
         this.setState({
           loading: false,
