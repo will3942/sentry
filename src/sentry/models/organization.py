@@ -20,10 +20,15 @@ from django.utils.translation import ugettext_lazy as _
 from sentry import roles
 from sentry.app import locks
 from sentry.constants import RESERVED_ORGANIZATION_SLUGS
-from sentry.db.models import (BaseManager, BoundedPositiveIntegerField, Model, sane_repr)
+from sentry.db.models import (
+    BaseManager,
+    BoundedPositiveIntegerField,
+    Model,
+    sane_repr)
 from sentry.db.models.utils import slugify_instance
 from sentry.utils.http import absolute_uri
 from sentry.utils.retries import TimedRetryPolicy
+from sentry.models import Authenticator
 
 
 # TODO(dcramer): pull in enum library
@@ -324,3 +329,9 @@ class Organization(Model):
             type='org.confirm_delete',
             context=context,
         ).send_async([o.email for o in owners])
+
+    def send_setup_2fa_emails(self):
+        for member in self.member_set.all():
+            user = member.user
+            if not Authenticator.objects.user_has_2fa(user):
+                user.send_setup_2fa_email()
