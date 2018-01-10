@@ -92,7 +92,7 @@
   "APIMethod": "stub",
   "proxyURL": "http://localhost:8000",
   "scripts": {
-    "test": "npm run jest -- tests/js/spec",
+    "test": "npm run jest -- tests/js/spec/**/*.spec.{js,jsx}",
     "test-ci": "npm run test -- --runInBand",
     "test-watch": "npm run test -- --watch",
     "jest": "NODE_ENV=test node_modules/.bin/jest",
@@ -101,29 +101,23 @@
     "dev-proxy": "node scripts/devproxy.js",
     "dev-server": "webpack-dev-server",
     "storybook": "start-storybook -p 9001 -c .storybook",
-    "snapshot": "build-storybook && PERCY_TOKEN=$STORYBOOK_PERCY_TOKEN PERCY_PROJECT=$STORYBOOK_PERCY_PROJECT percy-storybook --widths=375,1280",
+    "snapshot":
+      "build-storybook && PERCY_TOKEN=$STORYBOOK_PERCY_TOKEN PERCY_PROJECT=$STORYBOOK_PERCY_PROJECT percy-storybook --widths=375,1280",
     "webpack-profile": "yarn -s webpack --profile --json > stats.json"
   },
   "jest": {
-    "snapshotSerializers": [
-      "enzyme-to-json/serializer"
-    ],
+    "snapshotSerializers": ["enzyme-to-json/serializer"],
     "moduleNameMapper": {
       "\\.(css|less)$": "<rootDir>/tests/js/helpers/importStyleMock.js",
       "\\.(svg)$": "<rootDir>/tests/js/helpers/svgMock.js",
       "jquery": "<rootDir>/src/sentry/static/sentry/__mocks__/jquery.jsx",
-      "integration-docs-platforms": "<rootDir>/tests/fixtures/integration-docs/_platforms.json"
+      "integration-docs-platforms":
+        "<rootDir>/tests/fixtures/integration-docs/_platforms.json"
     },
-    "modulePaths": [
-      "<rootDir>/src/sentry/static/sentry"
-    ],
-    "setupFiles": [
-      "<rootDir>/tests/js/setup.js"
-    ],
+    "modulePaths": ["<rootDir>/src/sentry/static/sentry"],
+    "setupFiles": ["<rootDir>/tests/js/setup.js"],
     "setupTestFrameworkScriptFile": "<rootDir>/tests/js/setupFramework.js",
-    "testPathIgnorePatterns": [
-      "<rootDir>/tests/sentry/lang/javascript/"
-    ],
+    "testPathIgnorePatterns": ["<rootDir>/tests/sentry/lang/javascript/"],
     "unmockedModulePathPatterns": [
       "<rootDir>/node_modules/react",
       "<rootDir>/node_modules/reflux"
