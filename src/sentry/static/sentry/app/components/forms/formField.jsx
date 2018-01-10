@@ -1,7 +1,6 @@
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
-import idx from 'idx';
 
 import {defined} from '../../utils';
 
@@ -82,7 +81,7 @@ export default class FormField extends React.PureComponent {
     if (defined(props.error)) {
       return props.error;
     }
-    return idx(form, _ => _.errors[props.name]) || null;
+    return form?.errors?.[props.name] || null;
   }
 
   getId() {

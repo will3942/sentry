@@ -1,8 +1,8 @@
 {
   "presets": [
-    "react",
+    "@babel/react",
     [
-      "latest",
+      "@babel/env",
       {
         "es2015": {
           "modules": false
@@ -12,19 +12,19 @@
   ],
   "plugins": [
     "emotion",
-    "transform-decorators-legacy",
-    "transform-class-properties",
-    "transform-object-rest-spread",
+    "@babel/plugin-proposal-decorators",
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-syntax-dynamic-import",
+    "@babel/plugin-proposal-object-rest-spread",
+    "@babel/plugin-proposal-optional-chaining",
     "lodash",
-    "syntax-dynamic-import",
     "react-hot-loader/babel",
     [
       "babel-plugin-transform-builtin-extend",
       {
         "globals": ["Array"]
       }
-    ],
-    "idx"
+    ]
   ],
   "env": {
     "development": {
@@ -33,22 +33,7 @@
       ]
     },
     "test": {
-      "presets": ["react", "latest"],
-      "plugins": [
-        "emotion",
-        "transform-decorators-legacy",
-        "transform-class-properties",
-        "transform-object-rest-spread",
-        "dynamic-import-node",
-        "syntax-dynamic-import",
-        [
-          "babel-plugin-transform-builtin-extend",
-          {
-            "globals": ["Array"]
-          }
-        ],
-        "idx"
-      ]
+      "plugins": ["dynamic-import-node"]
     }
   }
 }
