@@ -10,6 +10,7 @@ import _ from 'lodash';
 
 import ApiMixin from '../mixins/apiMixin';
 import GroupStore from '../stores/groupStore';
+import LatestContextStore from '../stores/latestContextStore';
 import LoadingError from '../components/loadingError';
 import LoadingIndicator from '../components/loadingIndicator';
 import ProjectState from '../mixins/projectState';
@@ -27,6 +28,8 @@ import {logAjaxError} from '../utils/logging';
 import parseLinkHeader from '../utils/parseLinkHeader';
 import {t, tn, tct} from '../locale';
 
+import {objToQuery, queryToObj} from '../utils/stream';
+
 const MAX_TAGS = 500;
 
 const Stream = createReactClass({
@@ -42,6 +45,7 @@ const Stream = createReactClass({
   mixins: [
     Reflux.listenTo(GroupStore, 'onGroupChange'),
     Reflux.listenTo(StreamTagStore, 'onStreamTagChange'),
+    Reflux.listenTo(LatestContextStore, 'onLatestContextChange'),
     ApiMixin,
     ProjectState,
   ],
@@ -87,6 +91,7 @@ const Stream = createReactClass({
       isSidebarVisible: false,
       isStickyHeader: false,
       processingIssues: null,
+      activeEnvironment: null,
       ...this.getQueryState(),
     };
   },
@@ -110,15 +115,17 @@ const Stream = createReactClass({
     }
 
     // Do not make new API request if props haven't actually changed
-    if (!_.isEqual(this.props, nextProps)) {
+    // Unless no request has been performed yet
+    if (!_.isEqual(this.props, nextProps) || !this.lastRequest) {
       this.fetchData();
     }
 
     // you cannot apply both a query and a saved search (our routes do not
     // support it), so the searchId takes priority
+    let nextSearchId = nextProps.params.searchId || null;
     let searchIdChanged = this.state.isDefaultSearch
-      ? nextProps.params.searchId
-      : nextProps.params.searchId !== this.state.searchId;
+      ? nextSearchId
+      : nextSearchId !== this.state.searchId;
 
     if (searchIdChanged || nextProps.location.search !== this.props.location.search) {
       // TODO(dcramer): handle 404 from popState on searchId
@@ -354,6 +361,10 @@ const Stream = createReactClass({
       shortIdLookup: '1',
     };
 
+    if (this.state.activeEnvironment) {
+      requestParams.environment = this.state.activeEnvironment.name;
+    }
+
     let currentQuery = this.props.location.query || {};
     if ('cursor' in currentQuery) {
       requestParams.cursor = currentQuery.cursor;
@@ -477,6 +488,24 @@ const Stream = createReactClass({
     this.setState({
       tags: {...tags},
     });
+  },
+
+  onLatestContextChange(context) {
+    // Always query the currently active environment if one has been set
+    let environment = context.environment;
+
+    let query = environment
+      ? objToQuery({...queryToObj(this.state.query), environment: environment.name})
+      : this.state.query;
+
+    this.setState({
+      activeEnvironment: environment,
+      query,
+    });
+
+    if (environment) {
+      this.transitionTo();
+    }
   },
 
   onSearch(query) {
