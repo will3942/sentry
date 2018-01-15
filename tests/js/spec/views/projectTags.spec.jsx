@@ -36,7 +36,7 @@ describe('ProjectTags', function() {
 
   it('deletes tag', function() {
     wrapper
-      .find('tbody a.btn')
+      .find('a.btn')
       .first()
       .simulate('click');
 
@@ -47,6 +47,6 @@ describe('ProjectTags', function() {
 
     wrapper.update();
 
-    expect(wrapper.find('tbody tr').length).toBe(1);
+    expect(wrapper.state('tags').length).toBe(1);
   });
 });
