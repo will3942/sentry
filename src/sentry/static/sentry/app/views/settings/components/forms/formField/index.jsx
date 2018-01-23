@@ -17,7 +17,7 @@ import FormFieldWrapper from './formFieldWrapper';
 import FormState from '../../../../../components/forms/state';
 import InlineSvg from '../../../../../components/inlineSvg';
 import Spinner from '../styled/spinner';
-import SubmitOnReturnButton from '../submitOnReturnButton';
+import returnButton from '../returnButton';
 
 // This wraps Control + ControlError message
 // * can NOT be a flex box have because of position: absolute on "control error message"
@@ -68,7 +68,7 @@ const FormSpinner = styled(Spinner)`
   margin-left: 0;
 `;
 
-const SubmitOnReturnButtonStyled = styled(SubmitOnReturnButton)`
+const ReturnButtonStyled = styled(returnButton)`
   position: absolute;
   right: 0;
   top: 0;
@@ -99,7 +99,7 @@ class FormField extends React.Component {
     defaultValue: PropTypes.any,
     disabled: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
     disabledReason: PropTypes.string,
-    submitOnReturn: PropTypes.bool,
+    showReturnButton: PropTypes.bool,
     help: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
     required: PropTypes.bool,
     hideErrorMessage: PropTypes.bool,
@@ -135,7 +135,7 @@ class FormField extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {showSubmitOnReturnButton: false};
+    this.state = {showReturnButton: false};
   }
 
   componentDidMount() {
@@ -191,7 +191,7 @@ class FormField extends React.Component {
     let {value, event} = getValueFromEvent(...args);
     let model = this.getModel();
 
-    if (this.props.submitOnReturn) this.setState({showSubmitOnReturnButton: true});
+    if (this.props.showReturnButton) this.setState({showReturnButton: true});
 
     if (onChange) {
       onChange(value, event);
@@ -241,7 +241,7 @@ class FormField extends React.Component {
       inline,
       disabled,
       disabledReason,
-      submitOnReturn,
+      showReturnButton,
       hideErrorMessage,
       help,
       alignRight,
@@ -295,8 +295,7 @@ class FormField extends React.Component {
                   </span>
                 )}
 
-              {submitOnReturn &&
-                this.state.showSubmitOnReturnButton && <SubmitOnReturnButtonStyled />}
+              {showReturnButton && this.state.showReturnButton && <ReturnButtonStyled />}
             </FormFieldControlStyled>
 
             <FormFieldControlState justify="center" align="center">
