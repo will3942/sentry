@@ -13,6 +13,7 @@ const forms = [
         label: 'Additional Email',
         placeholder: 'e.g. secondary@example.com',
         help: 'Designate an alternative email for this account',
+        submitOnReturn: true,
       },
     ],
   },
