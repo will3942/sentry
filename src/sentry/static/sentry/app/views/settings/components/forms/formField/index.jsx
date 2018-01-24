@@ -69,9 +69,14 @@ const FormSpinner = styled(Spinner)`
 `;
 
 const ReturnButtonStyled = styled(returnButton)`
+  visibility: hidden;
   position: absolute;
   right: 0;
   top: 0;
+
+  input:focus ~ & {
+    visibility: visible;
+  }
 `;
 
 /**
@@ -133,11 +138,6 @@ class FormField extends React.Component {
     form: PropTypes.object,
   };
 
-  constructor(props) {
-    super(props);
-    this.state = {showReturnButton: false};
-  }
-
   componentDidMount() {
     // this.attachTooltips();
     // Tell model about this field's props
@@ -190,8 +190,6 @@ class FormField extends React.Component {
     let {name, onChange} = this.props;
     let {value, event} = getValueFromEvent(...args);
     let model = this.getModel();
-
-    if (this.props.showReturnButton) this.setState({showReturnButton: true});
 
     if (onChange) {
       onChange(value, event);
@@ -295,7 +293,7 @@ class FormField extends React.Component {
                   </span>
                 )}
 
-              {showReturnButton && this.state.showReturnButton && <ReturnButtonStyled />}
+              {showReturnButton && <ReturnButtonStyled />}
             </FormFieldControlStyled>
 
             <FormFieldControlState justify="center" align="center">
